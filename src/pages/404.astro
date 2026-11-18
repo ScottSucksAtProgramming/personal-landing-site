@@ -1,0 +1,17 @@
+---
+import ManPage from '../layouts/ManPage.astro';
+import Section from '../components/Section.astro';
+import { SITE } from '../site.config';
+---
+<ManPage
+  title={`Not found | ${SITE.fullName}`}
+  man="SCOTT(1)"
+  section="Personal Manual"
+  command="man this-page"
+  pagerName="404"
+>
+  <Section title="Error">
+    <h1 class="name">No manual entry for this page.</h1>
+    <p>The link may be old, or the page moved. Try <a href="/">scott(1)</a> or <a href="/writing/">scott-notes(7)</a>.</p>
+  </Section>
+</ManPage>

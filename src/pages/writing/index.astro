@@ -1,0 +1,43 @@
+---
+import ManPage from '../../layouts/ManPage.astro';
+import Section from '../../components/Section.astro';
+import { SITE } from '../../site.config';
+import { getPosts, isoDate } from '../../lib';
+
+const posts = await getPosts();
+const byYear = new Map<number, typeof posts>();
+for (const p of posts) {
+  const y = p.data.date.getUTCFullYear();
+  byYear.set(y, [...(byYear.get(y) ?? []), p]);
+}
+---
+<ManPage
+  title={`Writing | ${SITE.fullName}`}
+  description={`Field notes and posts by ${SITE.fullName}.`}
+  man="SCOTT-NOTES(7)"
+  section="Field Notes"
+  command="man 7 scott-notes"
+  pagerName="scott-notes(7)"
+  current="writing"
+>
+  <Section title="Name">
+    <h1 class="name"><b>scott-notes</b> - field notes, projects and things learned the hard way</h1>
+  </Section>
+
+  {[...byYear].map(([year, list]) => (
+    <Section title={String(year)}>
+      <ul class="posts">
+        {list.map((post) => (
+          <li>
+            <time datetime={isoDate(post.data.date)}>{isoDate(post.data.date)}</time>
+            <span><a href={`/writing/${post.id}/`}>{post.data.title}</a>{post.data.draft && <span class="draft"> [draft]</span>}</span>
+          </li>
+        ))}
+      </ul>
+    </Section>
+  ))}
+
+  <Section title="See also">
+    <p><a href="/">scott(1)</a>, <a href="/rss.xml">rss(5)</a>, <a href={SITE.newsletter.url}>{SITE.newsletter.name.toLowerCase()}(7)</a></p>
+  </Section>
+</ManPage>

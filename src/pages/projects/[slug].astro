@@ -1,0 +1,48 @@
+---
+import { render } from 'astro:content';
+import ManPage from '../../layouts/ManPage.astro';
+import Section from '../../components/Section.astro';
+import { SITE } from '../../site.config';
+import { getProjects } from '../../lib';
+
+export async function getStaticPaths() {
+  const projects = await getProjects();
+  return projects.map((project) => ({ params: { slug: project.id }, props: { project } }));
+}
+
+const { project } = Astro.props;
+const { Content } = await render(project);
+const { title, kind, summary, stack, status, url, repo } = project.data;
+const upper = `${project.id.toUpperCase()}(1)`;
+---
+<ManPage
+  title={`${title} | ${SITE.fullName}`}
+  description={summary}
+  man={upper}
+  section="Projects"
+  command={`man ${project.id}`}
+  pagerName={`${project.id}(1)`}
+  current="projects"
+>
+  <Section title="Name">
+    <h1 class="name"><b>{project.id}</b> - {summary}</h1>
+  </Section>
+
+  <Section title="Details">
+    <div class="codes" style="grid-template-columns: 8ch minmax(0, 1fr);">
+      <span>type</span><span>{kind.toLowerCase()}</span>
+      {status && <><span>status</span><span>{status}</span></>}
+      {stack && <><span>stack</span><span>{stack}</span></>}
+      {url && <><span>site</span><span><a href={url}>{url.replace(/^https?:\/\//, '').replace(/\/$/, '')}</a></span></>}
+      {repo && <><span>source</span><span><a href={repo}>{repo.replace(/^https?:\/\//, '').replace(/\/$/, '')}</a></span></>}
+    </div>
+  </Section>
+
+  <Section title="Description">
+    <div class="prose"><Content /></div>
+  </Section>
+
+  <Section title="See also">
+    <p><a href="/#projects">scott(1)</a></p>
+  </Section>
+</ManPage>

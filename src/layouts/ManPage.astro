@@ -1,0 +1,142 @@
+---
+import '@fontsource/jetbrains-mono/400.css';
+import '@fontsource/jetbrains-mono/400-italic.css';
+import '@fontsource/jetbrains-mono/500.css';
+import '@fontsource/jetbrains-mono/700.css';
+import '../styles/global.css';
+import { SITE } from '../site.config';
+
+interface Props {
+  /** Browser tab title. */
+  title: string;
+  description?: string;
+  /** Man page name in the header and footer, e.g. "SCOTT(1)". */
+  man: string;
+  /** Centre of the header line, e.g. "Personal Manual". */
+  section: string;
+  /** What the prompt line shows, e.g. "man scott". */
+  command: string;
+  /** Lower-case name for the pager bar, e.g. "scott(1)". */
+  pagerName: string;
+  /** Which nav item is current. */
+  current?: 'about' | 'projects' | 'writing' | 'contact';
+  /** Optional social preview image (absolute URL). */
+  image?: string;
+}
+const { title, description = SITE.description, man, section, command, pagerName, current, image } = Astro.props;
+const canonical = new URL(Astro.url.pathname, Astro.site);
+const isHome = Astro.url.pathname === '/';
+const year = new Date().getFullYear();
+const month = new Date().toLocaleString('en-US', { month: 'long' });
+---
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>{title}</title>
+  <meta name="description" content={description}>
+  <link rel="canonical" href={canonical}>
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="alternate" type="application/rss+xml" title={`${SITE.fullName}: writing`} href="/rss.xml">
+  <link rel="sitemap" href="/sitemap-index.xml">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content={title}>
+  <meta property="og:description" content={description}>
+  <meta property="og:url" content={canonical}>
+  {image && <meta property="og:image" content={image}>}
+  <meta name="theme-color" content="#f5f4ef" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#17181c" media="(prefers-color-scheme: dark)">
+  <script is:inline>
+    // Apply a saved theme before the page paints, so there's no flash.
+    try {
+      var t = localStorage.getItem('theme');
+      if (t === 'light' || t === 'dark') document.documentElement.setAttribute('data-theme', t);
+    } catch (e) {}
+  </script>
+</head>
+<body>
+  <a class="skip" href="#content">Skip to content</a>
+  <div class="page">
+    <div class="prompt">
+      <span aria-hidden="true">~ $ <b>{command}</b><span class="cursor"></span></span>
+      <span class="theme" role="group" aria-label="Color theme">
+        <button type="button" data-t="auto">auto</button>
+        <button type="button" data-t="light">light</button>
+        <button type="button" data-t="dark">dark</button>
+      </span>
+    </div>
+
+    <div class="hdr"><span>{man}</span><span class="mid">{section}</span><span>{man}</span></div>
+    <nav class="main" aria-label="Main">
+      <a href="/#description" aria-current={current === 'about' ? 'page' : undefined}>about</a>
+      <a href="/#projects" aria-current={current === 'projects' ? 'page' : undefined}>projects</a>
+      <a href="/writing/" aria-current={current === 'writing' ? 'page' : undefined}>writing</a>
+      <a href="/#contact" aria-current={current === 'contact' ? 'page' : undefined}>contact</a>
+    </nav>
+
+    <main id="content">
+      <slot />
+    </main>
+
+    <div class="ftr">
+      <span><a href="/">{SITE.domain}</a></span>
+      <span class="mid">{month} {year}</span>
+      <span>{man}</span>
+    </div>
+  </div>
+
+  <div class="pager" aria-hidden="true" data-name={pagerName} data-home={isHome ? '1' : '0'}>
+    <span class="pg">Manual page {pagerName} line 1</span>
+    <span class="keys">(j/k scroll, g/G top/end, {isHome ? 'q top' : 'q back'})</span>
+  </div>
+
+  <script>
+    // Theme switch: auto follows the device, light/dark override it.
+    const root = document.documentElement;
+    const buttons = document.querySelectorAll<HTMLButtonElement>('.theme button');
+    function setTheme(t: string) {
+      if (t === 'auto') root.removeAttribute('data-theme');
+      else root.setAttribute('data-theme', t);
+      buttons.forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.t === t)));
+      try { localStorage.setItem('theme', t); } catch {}
+    }
+    let saved = 'auto';
+    try { saved = localStorage.getItem('theme') || 'auto'; } catch {}
+    setTheme(saved);
+    buttons.forEach((b) => b.addEventListener('click', () => setTheme(b.dataset.t || 'auto')));
+
+    // Pager status line, like `less`.
+    const bar = document.querySelector<HTMLElement>('.pager');
+    const pg = bar?.querySelector<HTMLElement>('.pg');
+    const name = bar?.dataset.name ?? '';
+    const lineHeight = () => parseFloat(getComputedStyle(document.body).lineHeight) || 26;
+    function status() {
+      if (!pg) return;
+      const max = document.documentElement.scrollHeight - window.innerHeight;
+      const line = Math.max(1, Math.round(window.scrollY / lineHeight()) + 1);
+      const end = max <= 0 || window.scrollY >= max - 4;
+      pg.textContent = `Manual page ${name} line ${line}${end ? ' (END)' : ''}`;
+    }
+    window.addEventListener('scroll', status, { passive: true });
+    window.addEventListener('resize', status);
+    status();
+
+    // A few pager keys for keyboard people.
+    document.addEventListener('keydown', (e) => {
+      if (e.metaKey || e.ctrlKey || e.altKey) return;
+      const t = e.target as HTMLElement;
+      if (t.isContentEditable || ['INPUT', 'TEXTAREA', 'SELECT'].includes(t.tagName)) return;
+      const step = lineHeight() * 2;
+      if (e.key === 'j') window.scrollBy(0, step);
+      else if (e.key === 'k') window.scrollBy(0, -step);
+      else if (e.key === 'g') window.scrollTo(0, 0);
+      else if (e.key === 'G') window.scrollTo(0, document.documentElement.scrollHeight);
+      else if (e.key === 'q') {
+        if (bar?.dataset.home === '1') window.scrollTo(0, 0);
+        else location.href = '/';
+      }
+    });
+  </script>
+</body>
+</html>

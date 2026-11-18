@@ -1,0 +1,92 @@
+---
+import ManPage from '../layouts/ManPage.astro';
+import Section from '../components/Section.astro';
+import { SITE } from '../site.config';
+import { getPosts, getProjects, isoDate } from '../lib';
+import { Content as About, frontmatter as about } from '../content/about.md';
+
+const projects = await getProjects();
+const posts = (await getPosts()).slice(0, 5);
+const options: { flag: string; text: string }[] = about.options ?? [];
+const exitStatus: { code: number | string; text: string }[] = about.exitStatus ?? [];
+const cmd = SITE.command;
+---
+<ManPage
+  title={SITE.fullName}
+  man={`${cmd.toUpperCase()}(1)`}
+  section="Personal Manual"
+  command={`man ${cmd}`}
+  pagerName={`${cmd}(1)`}
+>
+  <div class="big" aria-hidden="true">{cmd}<span>(1)</span></div>
+
+  <Section title="Name">
+    <h1 class="name"><b>{cmd}</b>, <b>{SITE.fullName}</b> - {SITE.oneLiner}</h1>
+  </Section>
+
+  {options.length > 0 && (
+    <Section title="Synopsis">
+      <p class="syn"><b>{cmd}</b> {options.map((o) => <>[<b>{o.flag}</b>] </>)}[<i class="arg">project</i> ...]</p>
+    </Section>
+  )}
+
+  <Section title="Description" id="description">
+    <div class="prose"><About /></div>
+  </Section>
+
+  {options.length > 0 && (
+    <Section title="Options">
+      <dl class="opts">
+        {options.map((o) => (<><dt>{o.flag}</dt><dd>{o.text}</dd></>))}
+      </dl>
+    </Section>
+  )}
+
+  <Section title="Projects" id="projects">
+    <dl class="opts">
+      {projects.map((p) => (
+        <>
+          <dt><a href={`/projects/${p.id}/`}>{p.id}</a> <span class:list={['tag', { ems: p.data.kind.toLowerCase() === 'ems' }]}>[{p.data.kind.toLowerCase()}]</span></dt>
+          <dd>{p.data.summary} {p.data.stack && <span class="meta">{p.data.stack}.</span>}</dd>
+        </>
+      ))}
+    </dl>
+  </Section>
+
+  <Section title="Writing" id="writing">
+    <ul class="posts">
+      {posts.map((post) => (
+        <li>
+          <time datetime={isoDate(post.data.date)}>{isoDate(post.data.date)}</time>
+          <span><a href={`/writing/${post.id}/`}>{post.data.title}</a>{post.data.draft && <span class="draft"> [draft]</span>}</span>
+        </li>
+      ))}
+    </ul>
+    <p><a href="/writing/">All writing</a></p>
+  </Section>
+
+  <Section title="Newsletter" id="newsletter">
+    <p><b>{SITE.newsletter.name}</b> is {SITE.newsletter.blurb}</p>
+    <p><a href={SITE.newsletter.url}>Read or subscribe on Substack</a></p>
+  </Section>
+
+  {exitStatus.length > 0 && (
+    <Section title="Exit status">
+      <div class="codes">
+        {exitStatus.map((s) => (<><span>{s.code}</span><span>{s.text}</span></>))}
+      </div>
+    </Section>
+  )}
+
+  <Section title="Reporting bugs" id="contact">
+    <p>Send mail to <b>{SITE.email}</b>. Replies are slower during a shift.</p>
+  </Section>
+
+  <Section title="See also">
+    <p>
+      <a href={SITE.github}>github(1)</a>,
+      <a href="/rss.xml">rss(5)</a>,
+      <a href={SITE.newsletter.url}>{SITE.newsletter.name.toLowerCase()}(7)</a>
+    </p>
+  </Section>
+</ManPage>
