@@ -4,7 +4,7 @@ kind: ems
 summary: Hands-free app that logs and timestamps events during an EMS call.
 stack: Swift, iOS, watchOS (Android planned)
 status: in development
-order: 1
+order: 3
 ---
 
 On a critical call, every intervention needs a time: when the epi went in, when the rhythm changed, when you left the scene. Those times end up on gloves, tape and memory, and the chart is only as good as what survives the ride.

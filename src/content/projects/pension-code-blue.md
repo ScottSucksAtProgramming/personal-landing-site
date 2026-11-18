@@ -6,7 +6,7 @@ stack: PHP, HTML, Tiingo market data API
 status: live
 url: https://pension.poweredbyghosts.com/
 repo: https://github.com/ScottSucksAtProgramming/pension-code-blue
-order: 3
+order: 1
 ---
 
 A tongue-in-cheek dashboard that tracks the New York State Common Retirement Fund's "DNR (Do Not Retire)" status. It started as a joke for coworkers who kept asking what a bad market day did to the pension, and turned into a lesson in market data, caching and keeping a small site fast.

@@ -5,7 +5,7 @@ summary: AI agent that answers residents' questions about Town of Babylon govern
 stack: Python, FastAPI, SQLite FTS5, LLM (any OpenAI-compatible provider)
 status: pilot, chat frontend in development
 repo: https://github.com/ScottSucksAtProgramming/civicpulse
-order: 2
+order: 6
 ---
 
 Local government publishes almost everything, and almost nobody reads it. Agendas, minutes, the town code and hours of meeting video are public, but they're scattered across sites and written in legal language. CivicPulse lets a Town of Babylon resident ask a plain question and get a plain answer, with a numbered citation for every claim.
