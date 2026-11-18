@@ -6,8 +6,7 @@ export const SITE = {
   fullName: 'Scott Kostolni',
   oneLiner: 'paramedic and developer',
   description: 'Scott Kostolni, paramedic and developer. Projects, field notes and writing.',
-  // TODO: replace with an address you actually read before launch.
-  email: 'hello@scottkostolni.com',
+  email: 'scott@kostolni.me',
   github: 'https://github.com/ScottSucksAtProgramming',
   newsletter: {
     name: 'PoweredByGhosts',
