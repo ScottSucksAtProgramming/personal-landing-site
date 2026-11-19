@@ -11,6 +11,6 @@ export const SITE = {
   newsletter: {
     name: 'PoweredByGhosts',
     url: 'https://poweredbyghosts.substack.com/',
-    blurb: 'an occasional email newsletter: new projects, field notes and whatever got built lately. No schedule, no ads.',
+    blurb: "an occasional newsletter about what I'm learning: medical science, AI, EMS research and the odd experiment on myself. No schedule, no ads.",
   },
 };
